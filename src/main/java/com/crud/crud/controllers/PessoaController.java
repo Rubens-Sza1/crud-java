@@ -1,9 +1,6 @@
 package com.crud.crud.controllers;
 
-import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
@@ -15,7 +12,9 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
 
+import com.crud.crud.PessoaService;
 import com.crud.crud.models.Pessoa;
 import com.crud.crud.models.PessoaCad;
 
@@ -63,35 +62,29 @@ public class PessoaController {
     }
 
     @PostMapping("/create")
-    public String CriaPessoa(
+    public ModelAndView CriaPessoa(
         @Valid @ModelAttribute PessoaCad pessoacad,
         BindingResult result,
         Model model
     ) {
+        ModelAndView mav = new ModelAndView();
         if (result.hasErrors()) {
-            model.addAttribute("pessoacad", pessoacad);
-            return "pessoas/create";
+            mav.addObject("pessoacad", pessoacad);
+            mav.setViewName("pessoas/create");
+            return mav;
         }
         
-        // Verifica se uma pessoa com o mesmo CPF já existe
-        if (repo.ExisteCPF(pessoacad.getCpf())) {
-            model.addAttribute("pessoacad", pessoacad);        
-            return "pessoas/create";
+        boolean isCreated = pessoaService.createPessoa(pessoacad);
+        if (!isCreated) {
+            mav.addObject("error", "A pessoa com o mesmo CPF já existe.");
+            mav.addObject("pessoacad", pessoacad);
+            mav.setViewName("pessoas/create");
+            return mav;
         }
 
-        Pessoa pessoa = new Pessoa();
-        pessoa.setPes_nome(pessoacad.getNome());
-        pessoa.setPes_cpf(pessoacad.getCpf());
-        pessoa.setPes_telefone(pessoacad.getTelefone());
-        pessoa.setPes_email(pessoacad.getEmail());
-        pessoa.setPes_dt_ult_modificacao(LocalDateTime.now()); // Definindo a data de modificação como o momento atual.
-        pessoa.setPes_dt_cadastro(new Date()); // Definindo a data de cadastro como o momento atual.
-        pessoa.setStatus(1); // Definindo o status como ativo
-
-
-        repo.save(pessoa);
-        return "redirect:/pessoas";
-    }  
+        mav.setViewName("redirect:/pessoas");
+        return mav;
+    } 
     
     @GetMapping("/edit")
     public String MostraEditaPessoa(Model model, @RequestParam int id) {
@@ -116,57 +109,44 @@ public class PessoaController {
     }
     
 
+    @Autowired
+    public PessoaController(PessoaService pessoaService) {
+        this.pessoaService = pessoaService;
+    }
+
     @PostMapping("/edit")
     public String AtualizaPessoa(Model model, @RequestParam int id, @Valid @ModelAttribute PessoaCad pessoacad, BindingResult result) {
         try {
-            Pessoa pessoa = repo.findById(id).orElseThrow(() -> new IllegalArgumentException("Pessoa não encontrada com o ID: " + id));
-
-            model.addAttribute("pessoa", pessoa);
-
             if (result.hasErrors()) {
                 return "pessoas/EditaPessoas";
             }
 
-            // Verifica se o CPF já está sendo utilizado por outra pessoa
-            if (!pessoa.getPes_cpf().equals(pessoacad.getCpf()) && repo.ExisteCPF(pessoacad.getCpf())) {
-                model.addAttribute("error", "CPF já cadastrado");
-                model.addAttribute("pessoacad", pessoacad);
-                return "pessoas/EditaPessoas";
-            }
+            pessoaService.updatePessoa(id, pessoacad);
 
-            pessoa.setPes_nome(pessoacad.getNome());
-            pessoa.setPes_cpf(pessoacad.getCpf());
-            pessoa.setPes_telefone(pessoacad.getTelefone());
-            pessoa.setPes_email(pessoacad.getEmail());
-            pessoa.setPes_dt_ult_modificacao(LocalDateTime.now()); // Atualiza a data de modificação
-
-            repo.save(pessoa);
-
-        } catch (Exception ex) {
-            System.out.println("Erro: " + ex.getMessage());
+        } catch (IllegalArgumentException ex) {
+            model.addAttribute("error", ex.getMessage());
+            model.addAttribute("pessoacad", pessoacad);
+            return "pessoas/EditaPessoas";
         }
 
         return "redirect:/pessoas";
     }
     
+    @Autowired
+    private PessoaService pessoaService;
+    
     @GetMapping("/delete")
-    public String DeletaPessoa(
-        @RequestParam int id
-    ) {
+    public String deletePessoa(@RequestParam int id) {
         try {
-            Optional<Pessoa> optionalPessoa = repo.findById(id);
-            if (optionalPessoa.isPresent()) {
-                Pessoa pessoa = optionalPessoa.get();
-                pessoa.setStatus(0); // setando o valor para 'inativo'
-                repo.save(pessoa);
+            boolean isDeleted = pessoaService.deletePessoa(id);
+            if (isDeleted) {
+                return "redirect:/pessoas";
             } else {
-                System.out.println("Registro não encontrado com ID: " + id);
+                return "error";
             }
         } catch (Exception ex) {
-            System.out.println("Erro: " + ex.getMessage());
+            return "error";
         }
-
-        return "redirect:/pessoas";
     }
 
 
