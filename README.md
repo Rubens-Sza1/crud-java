@@ -1,4 +1,5 @@
 Script responsável por criar a database/tabela de pessoa.
+O banco responsável foi o phpmyadmin, pelo navegador mesmmo.
 
 
 
