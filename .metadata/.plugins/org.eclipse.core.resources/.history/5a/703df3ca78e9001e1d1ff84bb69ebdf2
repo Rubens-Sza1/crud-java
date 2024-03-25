@@ -1,0 +1,16 @@
+package com.crud.crud.controllers;
+
+import java.util.List;
+
+import org.springframework.data.domain.Sort;
+
+import com.crud.crud.models.Pessoa;
+
+public class PessoaRepository {
+
+	public List<Pessoa> findAll(Sort by) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}
