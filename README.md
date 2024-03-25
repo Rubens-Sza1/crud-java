@@ -1,19 +1,24 @@
 Script responsável por criar a database/tabela de pessoa.
 
+
+
+
+
+Banco de dados: `pessoa`
+
+
+```
+CREATE DATABASE pessoa;
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
-
-
---
--- Banco de dados: `pessoa`
---
+```
 
 -- --------------------------------------------------------
 
---
--- Estrutura para tabela `pessoa`
---
+
+Estrutura para tabela `pessoa`
+
 
 ```
 CREATE TABLE `pessoa` (
@@ -29,9 +34,9 @@ CREATE TABLE `pessoa` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 ```
 
---
--- Despejando dados para a tabela `pessoa`
---
+
+Inserindo dados para a tabela `pessoa`
+
 
 ```
 INSERT INTO `pessoa` (`id`, `pes_cpf`, `pes_dt_cadastro`, `pes_dt_ult_modificacao`, `pes_email`, `pes_flg_atv`, `pes_nome`, `pes_telefone`, `status`) VALUES
@@ -41,9 +46,9 @@ INSERT INTO `pessoa` (`id`, `pes_cpf`, `pes_dt_cadastro`, `pes_dt_ult_modificaca
 (4, '3213213', '2024-03-24 21:56:27.000000', '2024-03-24 21:56:27.000000', 'ruuh.liima@gmail.com', 0, 'Rubens De Lima Sousa', '+5511949083516', 1);
 ```
 
---
--- Índices de tabela `pessoa`
---
+
+Índices de tabela `pessoa`
+
 
 ```
 ALTER TABLE `pessoa`
@@ -53,9 +58,9 @@ ALTER TABLE `pessoa`
 ```
 
 
---
--- AUTO_INCREMENT de tabela `pessoa`
---
+
+AUTO_INCREMENT de tabela `pessoa`
+
 
 ```
 ALTER TABLE `pessoa`
